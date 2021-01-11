@@ -97,12 +97,12 @@ list_profiles() {
     CONFIG_FILE_PATH=$(realpath "$config")
     CONFIG_FILE_NAME=$(basename -- "$CONFIG_FILE_PATH")
     PROFILE_NAME="${CONFIG_FILE_NAME##*.}"
-    if grep -wq "aws_access_key_id\|aws_secret_access_key" "$CONFIG_FILE_PATH"; then
+    if file_contains_aws_keys "$CONFIG_FILE_PATH"; then
       echo "$PROFILE_NAME"
     else
       for credentials in $HOME/.aws/credentials.$PROFILE_NAME; do
         CREDENTIAL_FILE_PATH=$(realpath "$credentials")
-        if grep -wq "aws_access_key_id\|aws_secret_access_key" "$CREDENTIAL_FILE_PATH"; then
+        if file_contains_aws_keys "$CREDENTIAL_FILE_PATH"; then
           echo "$PROFILE_NAME"
         fi
       done
@@ -110,8 +110,13 @@ list_profiles() {
   done
 }
 
+default_aws_files_exist() {
+  { test -f "$HOME/.aws/credentials" && test ! -L "$HOME/.aws/credentials" ;} || 
+  { test -f "$HOME/.aws/config" && test ! -L "$HOME/.aws/config" ;}
+}
+
 setup_check() {
-  if { [ -f "$HOME/.aws/credentials" ] && [ ! -L "$HOME/.aws/credentials" ] ;} || { [ -f "$HOME/.aws/config" ] && [ ! -L "$HOME/.aws/config" ] ;}; then
+  if default_aws_files_exist; then
     echo_error "awsprofile is not setup correctly"
     echo
     echo "${BOLD}Perform a full test with:${RESET_FONT}"
