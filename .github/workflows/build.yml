@@ -1,0 +1,74 @@
+name: build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install required build packages
+        run: sudo apt-get install pandoc
+
+      - name: Create build directories
+        run: mkdir build build/docs
+
+      - name: Move awsprofile.sh to build/awsprofile
+        run: mv bin/awsprofile build/awsprofile
+
+      - name: Get the version
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Set release version in awsprofile
+        run: sed -i -- "s/__release_version__/awsprofile ${{ env.RELEASE_VERSION }}/g" build/awsprofile
+
+      - name: Set release year in awsprofile
+        run: sed -i -- "s/__release_date__/$(date +"%Y")/g" build/awsprofile
+
+      - name: Set release version in manpage
+        run: sed -i -- "s/__release_version__/awsprofile ${{ env.RELEASE_VERSION }}/g" docs/manpage.md
+
+      - name: Set release date in manpage
+        run: sed -i -- "s/__release_date__/$(date +"%B %Y")/g" docs/manpage.md
+
+      - name: Create manpage
+        run: pandoc docs/manpage.md -s -t man -o build/docs/awsprofile.1
+
+      - name: Create awsprofile.tar.gz
+        run: cd build && tar -czvf ../awsprofile.tar.gz awsprofile docs && cd ..
+
+      - name: Generate sha256sum of awsprofile.tar.gz
+        run: echo "CHECKSUM=$(sha256sum awsprofile.tar.gz)" >> $GITHUB_ENV
+
+      - name: Upload awsprofile.tar.gz
+        uses: actions/upload-artifact@v2
+        with:
+          name: awsprofile
+          path: awsprofile.tar.gz
+
+      - name: Create release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "${{ github.ref }}"
+          release_name: "${{ github.ref }}"
+          body: |
+            sha256sum:
+            ${{ env.CHECKSUM }}
+
+      - name: Upload awsprofile
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: awsprofile.tar.gz
+          asset_name: awsprofile.tar.gz
+          asset_content_type: application/gzip

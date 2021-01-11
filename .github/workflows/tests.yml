@@ -1,0 +1,31 @@
+name: tests
+
+env:
+  FORCE_COLOR: 1
+  TERM: "dumb"
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main]
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Lint check
+        uses: azohra/shell-linter@v0.3.0
+
+  unit_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install ShellSpec
+        run: curl -fsSL https://git.io/shellspec | sh -s -- --yes
+
+      - name: Run ShellSpec
+        run: /home/runner/.local/bin/shellspec

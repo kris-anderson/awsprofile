@@ -1,0 +1,482 @@
+#!/bin/sh
+#
+# awsprofile allows for easy management and switching between your multiple AWS
+# profiles, in a lightweight, POSIX compatible shell script, that gives you a
+# lot of granularity and easy integration into your dotfiles.
+#
+# Source               https://github.com/kris-anderson/awsprofile
+# File bugs on GitHub  https://github.com/kris-anderson/awsprofile/issues
+#
+# MIT License
+#
+# Copyright (c) 2021 Kris Anderson
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+############################
+## colors and font weight ##
+############################
+
+if [ -t 1 ]; then
+  GREEN=$(tput setaf 2)
+  BLUE=$(tput setaf 4)
+  YELLOW=$(tput setaf 3)
+  RED=$(tput setaf 1)
+  BOLD=$(tput bold)
+  RESET_FONT=$(tput sgr0)
+else
+  GREEN=""
+  BLUE=""
+  YELLOW=""
+  RED=""
+  BOLD=""
+  RESET_FONT=""
+fi
+
+######################
+## pretty functions ##
+######################
+
+echo_bold() {
+  echo "${BOLD}${1}${RESET_FONT}"
+}
+
+echo_blue() {
+  echo "${BOLD}${BLUE}${1}${RESET_FONT}${2}"
+}
+
+echo_arrow_icon() {
+  echo "${BOLD}${YELLOW} ⇒ ${RESET_FONT}""$1"" "
+}
+
+echo_warning() {
+  echo "${BOLD}${YELLOW}** Warning **${RESET_FONT}"
+  echo "$1"
+}
+
+echo_error() {
+  echo "${BOLD}${RED}** Error **${RESET_FONT}"
+  echo "$1"
+}
+
+ok() {
+  echo "${BOLD}${GREEN}[ok]${RESET_FONT}"
+}
+
+failed() {
+  echo "${BOLD}${RED}[failed]${RESET_FONT}"
+}
+
+error() {
+  echo "${BOLD}${RED}[error]${RESET_FONT}"
+}
+
+#######################
+## regular functions ##
+#######################
+
+list_profiles() {
+  echo_bold "Available profiles:"
+  for config in "$HOME"/.aws/config.*; do
+    CONFIG_FILE_PATH=$(realpath "$config")
+    CONFIG_FILE_NAME=$(basename -- "$CONFIG_FILE_PATH")
+    PROFILE_NAME="${CONFIG_FILE_NAME##*.}"
+    if grep -wq "aws_access_key_id\|aws_secret_access_key" "$CONFIG_FILE_PATH"; then
+      echo "$PROFILE_NAME"
+    else
+      for credentials in $HOME/.aws/credentials.$PROFILE_NAME; do
+        CREDENTIAL_FILE_PATH=$(realpath "$credentials")
+        if grep -wq "aws_access_key_id\|aws_secret_access_key" "$CREDENTIAL_FILE_PATH"; then
+          echo "$PROFILE_NAME"
+        fi
+      done
+    fi
+  done
+}
+
+setup_check() {
+  if { [ -f "$HOME/.aws/credentials" ] && [ ! -L "$HOME/.aws/credentials" ] ;} || { [ -f "$HOME/.aws/config" ] && [ ! -L "$HOME/.aws/config" ] ;}; then
+    echo_error "awsprofile is not setup correctly"
+    echo
+    echo "${BOLD}Perform a full test with:${RESET_FONT}"
+    echo "awsprofile --doctor"
+    exit 1
+  fi
+}
+
+test_if_utility_installed() {
+  test "$(command -v "$1")"
+}
+
+utility_installed_ok() {
+  echo "$1 $(ok)"
+}
+
+utility_installed_failed() {
+  echo "$1 $(failed) - install \"$1\" from your package manager"
+}
+
+aws_credentials_file_exists() {
+  test -f "$HOME/.aws/credentials" && test ! -L "$HOME/.aws/credentials"
+}
+
+aws_config_file_exists() {
+  test -f "$HOME/.aws/config" && test ! -L "$HOME/.aws/config"
+}
+
+awsprofile_config_exist() {
+  test -n "$(find "$HOME/.aws/" -maxdepth 1 -name "config.*" -print -quit 2>/dev/null)"
+}
+
+awsprofile_config_list() {
+  config in "$HOME"/.aws/config.*
+}
+
+awsprofile_config_contains_default() {
+  head -n 1 "$CONFIG_FILE_PATH" | grep -wq "\[default\]"
+}
+
+file_contains_aws_keys() {
+  grep -wq "aws_access_key_id\|aws_secret_access_key" "$1"
+}
+
+awsprofile_credential_exist() {
+  test -e "$HOME/.aws/credentials.$PROFILE_NAME"
+}
+
+aws_config_is_symlink() {
+  test -L "$HOME/.aws/config"
+}
+
+config_file_found() {
+  test -e "$HOME/.aws/config.$1" 
+}
+
+credential_file_found() {
+  test -e "$HOME"/.aws/credentials."$1"
+}
+
+file_is_symlink() {
+  test -L "$1"
+}
+
+print_command_missing() {
+  setup_check
+  echo_warning "$1"
+  echo
+  echo_bold "Print available commands with:"
+  echo "awsprofile --help"
+  exit 1
+}
+
+no_command_provided() {
+  test $# -eq 0
+}
+
+empty_input() {
+  test "$1" = ""
+}
+
+########################
+## command: --current ##
+########################
+
+if [ "$1" = "-c" ] || [ "$1" = "--current" ]; then
+  setup_check
+  CONFIG_FILE_PATH=$(readlink "$HOME/.aws/config")
+  CONFIG_SYMLINK_NAME=$(basename -- "$CONFIG_FILE_PATH")
+  PROFILE_NAME="${CONFIG_SYMLINK_NAME##*.}"
+  if aws_config_is_symlink; then
+    echo "Current profile: ${BOLD}${GREEN}${PROFILE_NAME}${RESET_FONT}"
+    exit 0
+  else
+    echo_warning "Profile not set"
+    echo
+    echo_bold "Set your profile with:"
+    echo "awsprofile --set your_profile_name"
+    echo
+    list_profiles
+    exit 1
+  fi
+fi
+
+#######################
+## command: --doctor ##
+#######################
+
+if [ "$1" = "-d" ] || [ "$1" = "--doctor" ]; then
+
+  echo_bold "Checking for required command line utilities"
+
+  required_utilities_list="basename find readlink realpath tr"
+  echo "$required_utilities_list" | tr ' ' '\n' | while read -r utility_name; do
+
+    if test_if_utility_installed "$utility_name"; then
+      utility_installed_ok "$utility_name"
+    else
+      utility_installed_failed "$utility_name"
+    fi
+
+  done
+
+  echo
+  echo_bold "Checking ~/.aws/ directory for default files"
+
+  if aws_credentials_file_exists; then
+    echo "credentials should not exist $(failed)"
+    echo "  ${BOLD}hint:${RESET_FONT} move the file contents"
+    echo "    ${BOLD}from this:${RESET_FONT} $HOME/.aws/credentials"
+    echo "    ${BOLD}to this:${RESET_FONT} $HOME/.aws/config.your_profile_name"
+    echo "    ${BOLD}or this:${RESET_FONT} $HOME/.aws/credentials.your_profile_name"
+    echo "    ${BOLD}then delete:${RESET_FONT} $HOME/.aws/credentials"
+  else
+    echo "credentials should not exist $(ok)"
+  fi
+
+  if aws_config_file_exists; then
+    echo "config should not exist $(failed)"
+    echo "  ${BOLD}hint:${RESET_FONT} move the file contents"
+    echo "    ${BOLD}from this:${RESET_FONT} $HOME/.aws/config"
+    echo "    ${BOLD}to this:${RESET_FONT} $HOME/.aws/config.your_profile_name"
+    echo "    ${BOLD}then delete:${RESET_FONT} $HOME/.aws/config"
+  else
+    echo "config should not exist $(ok)"
+  fi
+
+  echo
+  echo_bold "Checking ~/.aws/ for custom configuration files"
+
+  if awsprofile_config_exist; then
+
+    for config in "$HOME"/.aws/config.*; do
+
+      CONFIG_FILE_PATH=$(realpath "$config")
+      CONFIG_FILE_NAME=$(basename -- "$CONFIG_FILE_PATH")
+      PROFILE_NAME="${CONFIG_FILE_NAME##*.}"
+
+      echo
+      echo_blue "  Profile: " "${PROFILE_NAME}"
+
+      if awsprofile_config_contains_default; then
+        echo "  $CONFIG_FILE_NAME contains [default] on line 1 $(ok)"
+      else
+        echo "  $CONFIG_FILE_NAME contains [default] on line 1 $(error) - not found"
+      fi
+
+      if file_contains_aws_keys "$CONFIG_FILE_PATH"; then
+        echo "  $CONFIG_FILE_NAME contains aws_access_key_id $(ok)"
+        echo "  $CONFIG_FILE_NAME contains aws_secret_access_key $(ok)"
+      else
+
+        if awsprofile_credential_exist; then
+          if file_contains_aws_keys "$HOME/.aws/credentials.$PROFILE_NAME"; then
+            echo "  credentials.$PROFILE_NAME contains aws_access_key_id $(ok)"
+            echo "  credentials.$PROFILE_NAME contains aws_secret_access_key $(ok)"
+          else
+            echo "  credentials.$PROFILE_NAME contains keys $(error) - keys not found"
+          fi
+        else
+          echo "  credentials.$PROFILE_NAME exists $(error) - file not found"
+        fi
+      fi
+
+    done
+
+  else
+
+  echo_warning "No profiles found"
+
+  fi
+
+  exit 0
+
+fi
+
+#####################
+## command: --help ##
+#####################
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+  echo_bold "Usage:"
+  echo "  awsprofile <command> [options]"
+  echo
+  echo_bold "Commands:"
+  echo "  -c, --current        Print current profile"
+  echo "  -d, --doctor         Checks for potential problems"
+  echo "  -h, --help           Print this help message"
+  echo "  -l, --list           List available profiles"
+  echo "  -s, --set            Set profile to [profile_name]"
+  echo "  -v, --version        Print version"
+  echo
+  echo_bold "Options:"
+  echo "  profile_name         Name of your custom profile"
+  echo
+  echo_bold "Example usage:"
+  echo "  awsprofile --current"
+  echo "  awsprofile --list"
+  echo "  awsprofile --set personal"
+  echo "  awsprofile --set work"
+  exit 0
+fi
+
+#####################
+## command: --list ##
+#####################
+
+if [ "$1" = "-l" ] || [ "$1" = "--list" ]; then
+  setup_check
+  list_profiles
+  exit 0
+fi
+
+####################
+## command: --set ##
+####################
+
+if [ "$1" = "-s" ] || [ "$1" = "--set" ]; then
+  setup_check
+  if empty_input "$2"; then
+    echo_warning "No profile name provided"
+    echo
+    echo_bold "profile_name is required with the set command:"
+    echo "awsprofile --set profile_name"
+    echo
+    echo "View available profiles with:"
+    echo "awsprofile --list"
+    exit 1
+  elif ! config_file_found "$2"; then
+    echo_warning "Profile not found:"
+    echo "$HOME/.aws/config.$2"
+    echo
+    echo "Make sure that file exists."
+    exit 1
+  elif ! file_contains_aws_keys "$HOME/.aws/config.$2"; then
+    if ! credential_file_found "$2"; then
+      echo_warning "Profile mis-configured"
+      echo
+      echo "Your config file does not contain your AWS credentials:"
+      echo "$HOME/.aws/config.$2"
+      echo
+      echo "This file does not exist:"
+      echo "$HOME/.aws/credentials.$2"
+      echo
+      echo "Either add your credentials to your config.$2, or create"
+      echo "a credentials.$2 file."
+      exit 1
+    elif ! file_contains_aws_keys "$HOME"/.aws/credentials."$2"; then
+      echo_warning "Profile mis-configured"
+      echo
+      echo "Your config file does not contain your AWS credentials:"
+      echo "$HOME/.aws/config.$2"
+      echo
+      echo "Your credentials file does not contain your AWS credentials:"
+      echo "$HOME/.aws/credentials.$2"
+      echo
+      echo "Add your credentials to either of these two files:"
+      echo "$HOME/.aws/config.$2"
+      echo "$HOME/.aws/credentials.$2"
+      exit 1
+    fi
+  fi
+
+  if file_is_symlink "$HOME/.aws/config"; then
+    unlink "$HOME/.aws/config"
+  fi
+
+  if file_is_symlink "$HOME/.aws/credentials"; then
+    unlink "$HOME/.aws/credentials"
+  fi
+
+  ln -s "$HOME/.aws/config.$2" "$HOME/.aws/config"
+
+  if [ -e "$HOME/.aws/credentials.$2" ]; then
+    ln -s "$HOME/.aws/credentials.$2" "$HOME/.aws/credentials"
+  fi
+
+  echo "Profile now set to: ${BOLD}${GREEN}$2${RESET_FONT}"
+  exit 0
+
+fi
+
+########################
+## command: --version ##
+########################
+
+if [ "$1" = "-v" ] || [ "$1" = "--version" ] ; then
+  echo "__release_version__"
+  echo "Copyright (C) __release_date__ Kris Anderson"
+  echo "Source available at https://github.com/kris-anderson/awsprofile"
+  exit 0
+fi
+
+##############################
+## command: --initial-setup ##
+##############################
+
+if [ "$1" = "--initial-setup" ] ; then
+  echo_bold "Take the content from these files:"
+  echo "$HOME/.aws/config"
+  echo "$HOME/.aws/credentials"
+  echo
+  echo_bold "and move them to a new file that follows this naming convention:"
+  echo_arrow_icon "$HOME/.aws/config.your_profile_name"
+  echo
+  echo_bold "Examples"
+  echo_arrow_icon "$HOME/.aws/config.personal"
+  echo_arrow_icon "$HOME/.aws/config.work"
+  echo_arrow_icon "$HOME/.aws/config.whatever"
+  echo
+  echo_bold "Each config file's contents should look similar to this:"
+  echo "--------------------------------------------------------------"
+  echo "[default]"
+  echo "aws_access_key_id=AK##################"
+  echo "aws_secret_access_key=8t######################################"
+  echo "region=us-west-1"
+  echo "output=json"
+  echo "--------------------------------------------------------------"
+  echo
+  echo "Change the contents to match your configuration, but keep [default]"
+  echo "as the first line for each config file"
+  echo
+  echo_bold "Note:"
+  echo "You can also separate the credentials from your config files"
+  echo "if you prefer. Keep [default] as the first line in each credential"
+  echo "file. If you choose to do this, your ~/.aws/ directory may look like:"
+  echo_arrow_icon "$HOME/.aws/config.personal"
+  echo_arrow_icon "$HOME/.aws/config.work"
+  echo_arrow_icon "$HOME/.aws/config.whatever"
+  echo_arrow_icon "$HOME/.aws/credentials.personal"
+  echo_arrow_icon "$HOME/.aws/credentials.work"
+  echo_arrow_icon "$HOME/.aws/credentials.whatever"
+  echo
+  echo_bold "Delete the default files after you create your custom config files:"
+  echo_arrow_icon "$HOME/.aws/config"
+  echo_arrow_icon "$HOME/.aws/credentials"
+  exit 0
+fi
+
+#######################
+## command not found ##
+#######################
+
+if no_command_provided; then
+  print_command_missing "No command provided"
+else
+  print_command_missing "Command not found"
+fi
