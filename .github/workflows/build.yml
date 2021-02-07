@@ -49,7 +49,7 @@ jobs:
         run: pandoc docs/manpage.md -s -t man -o build/docs/awsprofile.1
 
       - name: Create awsprofile.tar.gz
-        run: cd build && tar -czvf ../awsprofile.tar.gz awsprofile docs && cd ..
+        run: cd build && tar -czvf ../awsprofile.tar.gz awsprofile docs completions && cd ..
 
       - name: Generate sha256sum of awsprofile.tar.gz
         run: echo "CHECKSUM=$(sha256sum awsprofile.tar.gz)" >> $GITHUB_ENV
