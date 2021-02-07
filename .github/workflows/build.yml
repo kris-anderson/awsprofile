@@ -16,7 +16,7 @@ jobs:
         run: sudo apt-get install pandoc
 
       - name: Create build directories
-        run: mkdir build build/docs
+        run: mkdir build build/docs build/completions build/completions/bash build/completions/zsh build/completions/fish
 
       - name: Move autocompletions for zsh
         run: mv completions/zsh/_awsprofile build/completions/zsh/_awsprofile
