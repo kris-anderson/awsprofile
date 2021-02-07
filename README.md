@@ -8,83 +8,83 @@ awsprofile allows for easy switching between your multiple AWS profiles, along w
 
 ## You May Like This If
 
-* You don't like having a single `~/.aws/credentials` file that contains all your profiles.
-* You don't like having to use the awscli `--profile` parameter in your commands.
+- You don't like having a single `~/.aws/credentials` file that contains all your profiles.
+- You don't like having to use the awscli `--profile` parameter in your commands.
 
 ## Tell Me More
 
 Want to use your personal keys and config as your default AWS profile?
 
 ```bash
-❯ awsprofile --set personal
+❯ awsprofile set personal
 ```
 
 Changed your mind and want to switch to your work profile?
 
 ```bash
-❯ awsprofile --set work
+❯ awsprofile set work
 ```
 
 Forgot what profile you're using and want to check before you run an `awscli` command?
 
 ```bash
-❯ awsprofile --current
+❯ awsprofile current
 ```
 
 Want to see what profiles you can switch to?
 
 ```bash
-❯ awsprofile --list
+❯ awsprofile list
 ```
 
 ## Key features
 
-* Switch from using a single `credential` and `config` file, to having unique files for each of your profiles.
-* Utilizes basic, native OS commands, ensuring it works out of the box on:
-  * macOS
-  * Linux
-  * FreeBSD
-  * WSL (bash on Windows)
-* Full POSIX compatibility
-* **Lightweight** - Will not slow down your terminal.
-* **Simple** - It is a symlink manager that you opperate via CLI.
-* **100% open source** - You can look at the code and see what's going on.
+- Switch from using a single `credential` and `config` file, to having unique files for each of your profiles.
+- Utilizes basic, native OS commands, ensuring it works out of the box on:
+  - macOS
+  - Linux
+  - FreeBSD
+  - WSL (bash on Windows)
+- Full POSIX compatibility
+- **Lightweight** - Will not slow down your terminal.
+- **Simple** - It is a symlink manager that you opperate via CLI.
+- **100% open source** - You can look at the code and see what's going on.
 
 ## Installation Instructions
 
-### macOS
+### macOS via Homebrew
 
 ```bash
 brew install kris-anderson/tap/awsprofile
 ```
 
-### Manual (should work on linux, BSD, and WSL)
+### Manual (should work on macOS, linux, BSD, and WSL)
 
 1. Create a `~/.local/bin/` directory if you don't already have one. This location is my personal preference, since I don't want my custom commands in system locations like `/usr/bin`. If you prefer to store it somewhere else, you don't need to create this directory.
 
-    ```bash
-    mkdir -p "$HOME/.local/bin/"
-    ```
+   ```bash
+   mkdir -p "$HOME/.local/bin/"
+   ```
 
 2. Download and extract the latest release to the above folder location, or modify the command below to your location of choice.
 
-    ```bash
-    wget -O- https://github.com/kris-anderson/awsprofile/releases/latest/download/awsprofile.tar.gz | tar -xz -C "$HOME/.local/bin/" awsprofile
-    ```
+   ```bash
+   wget -O- https://github.com/kris-anderson/awsprofile/releases/latest/download/awsprofile.tar.gz | tar -xz -C "$HOME/.local/bin/" awsprofile
+   ```
 
 3. > If you use `bash`, you can edit `~/.profile` or `~/.bash_profile`. If you use `zsh`, you can edit `~/.zshrc`. Impliment either of the following methods:
 
-    **Method 1:** Source the file wherever you saved it.
+   **Method 1:** Source the file wherever you saved it.
 
-    ```bash
-    source /path/to/awsprofile
-    ```
+   ```bash
+   source /path/to/awsprofile
+   ```
 
-    **Method 2:** Make sure `~/.local/bin/` is part of your environment path.
+   **Method 2:** Make sure `~/.local/bin/` is part of your environment path.
 
-    ```bash
-    export PATH="$HOME/.local/bin:$PATH"
-    ````
+   ```bash
+   export PATH="$HOME/.local/bin:$PATH"
+   ```
 
 ## Initial Configuration
 
@@ -136,7 +136,7 @@ Once you do this, your `aws` command will no longer work, since it's looking for
 
 ## How it Works
 
-After we run `awsprofile --set personal` this is what your `~/.aws/` directory will look like:
+After we run `awsprofile set personal` this is what your `~/.aws/` directory will look like:
 
 ```bash
 config -> /Users/myname/.aws/config.personal
@@ -147,7 +147,7 @@ config.whatever
 
 Note that there's now a `config` file in that folder, and it is symlinked to your `config.personal` file.
 
-Run `awsprofile --set work` and your directory now looks like this:
+Run `awsprofile set work` and your directory now looks like this:
 
 ```bash
 config -> /Users/myname/.aws/config.work

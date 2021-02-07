@@ -1,6 +1,6 @@
-% AWSPROFILE(1) __release_version__
+% AWSPROFILE(1) **release_version**
 % Kris Anderson
-% __release_date__
+% **release_date**
 
 # NAME
 
@@ -8,11 +8,11 @@ awsprofile - easy switching between your multiple AWS profiles
 
 # SYNOPSIS
 
-awsprofile --set *profile_name*
+awsprofile set _profile_name_
 
 # DESCRIPTION
 
-Switch from using a single *credential* and *config* file, to having unique files for each of your profiles.
+Switch from using a single _credential_ and _config_ file, to having unique files for each of your profiles.
 
 Lightweight - Will not slow down your terminal.
 
@@ -22,42 +22,42 @@ Simple - It is a symlink manager that you opperate via CLI.
 
 # REQUIREMENTS
 
-Awsprofile is out of the box portable. It runs under any Unix-like stack: macOS, Linux, *BSD, and WSL. It runs as under /bin/sh and is fully POSIX compatible. Standard utilities like command, basename, find, readlink, realpath and tr are also needed.
+Awsprofile is out of the box portable. It runs under any Unix-like stack: macOS, Linux, \*BSD, and WSL. It runs as under /bin/sh and is fully POSIX compatible. Standard utilities like command, basename, find, readlink, realpath and tr are also needed.
 
 # OPTIONS
 
-**-c**, **-\-current**
+**current**
 : print current profile
 
-**-d**, **--doctor**
+**doctor**
 : checks for potential problems
 
-**-h**, **-\-help**
+**help**
 : print help message
 
-**-l**, **-\-list**
+**list**
 : list available profiles
 
-**-s** *profile_name*, **-\-set** *profile_name*
-: set profile to *profile_name*
+**set** _profile_name_
+: set profile to _profile_name_
 
-**-v**, **-\-version**
+**version**
 : print version info
 
 # EXAMPLES
 
-**awsprofile -\-set personal**
-: set profile to personal, which uses *~/.aws/config.personal* and optionally *~/.aws/credentials.personal*
+**awsprofile set personal**
+: set profile to personal, which uses _~/.aws/config.personal_ and optionally _~/.aws/credentials.personal_
 
-**awsprofile -\-set work**
-: set profile to work, which uses *~/.aws/config.work* and optionally *~/.aws/credentials.work*
+**awsprofile set work**
+: set profile to work, which uses _~/.aws/config.work_ and optionally _~/.aws/credentials.work_
 
-**awsprofile -\-current**
+**awsprofile current**
 : prints the currently used profile
 
 # INITIAL CONFIGURATION
 
-You need to change the structure of your *~/.aws/* folder contents. Currently, you should have two files in that folder:
+You need to change the structure of your _~/.aws/_ folder contents. Currently, you should have two files in that folder:
 
 ```text
 config
@@ -99,13 +99,13 @@ credentials.work
 credentials.whatever
 ```
 
-Once you do this, your *aws* command will no longer work, since it's looking for the *~/.aws/config* and optionally *~/.aws/credentials* files that no longer exist. But that's where this utility comes in.
+Once you do this, your _aws_ command will no longer work, since it's looking for the _~/.aws/config_ and optionally _~/.aws/credentials_ files that no longer exist. But that's where this utility comes in.
 
-*awsprofile* allows for easy symlinking of these new files back to the original */.aws/config* and optionally *~/.aws/credentials* files that the *aws* CLI utility is looking for.
+_awsprofile_ allows for easy symlinking of these new files back to the original _/.aws/config_ and optionally _~/.aws/credentials_ files that the _aws_ CLI utility is looking for.
 
 # HOW IT WORKS
 
-After we run *awsprofile --set personal* this is what your *~/.aws/* directory will look like:
+After we run _awsprofile set personal_ this is what your _~/.aws/_ directory will look like:
 
 ```bash
 config -> /Users/myname/.aws/config.personal
@@ -114,9 +114,9 @@ config.work
 config.whatever
 ```
 
-Note that there's now a *config* file in that folder, and it is symlinked to your *config.personal* file.
+Note that there's now a _config_ file in that folder, and it is symlinked to your _config.personal_ file.
 
-Run *awsprofile --set work* and your directory now looks like this:
+Run _awsprofile set work_ and your directory now looks like this:
 
 ```bash
 config -> /Users/myname/.aws/config.work
