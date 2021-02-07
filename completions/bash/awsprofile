@@ -1,0 +1,101 @@
+# Bash completion script for awsprofile(1)
+
+__awsprofilecomp_words_include() {
+    local i=1
+    while [[ "$i" -lt "$COMP_CWORD" ]]; do
+        if [[ "${COMP_WORDS[i]}" = "$1" ]]; then
+            return 0
+        fi
+        ((i++))
+    done
+    return 1
+}
+
+# Find the previous non-switch word
+__awsprofilecomp_prev() {
+    local idx="$((COMP_CWORD - 1))"
+    local prv="${COMP_WORDS[idx]}"
+    while [[ "$prv" = -* ]]; do
+        ((idx--))
+        prv="${COMP_WORDS[idx]}"
+    done
+    echo "$prv"
+}
+
+__awsprofilecomp() {
+    # break $1 on space, tab, and newline characters,
+    # and turn it into a newline separated list of words
+    local list s sep=$'\n' IFS=$' \t\n'
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+
+    for s in $1; do
+        __awsprofilecomp_words_include "$s" && continue
+        list="$list$s$sep"
+    done
+
+    IFS="$sep"
+    COMPREPLY+=($(compgen -W "$list" -- "$cur"))
+}
+
+__awsprofile_complete_set() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local available_profiles="$(awsprofile --list)"
+    COMPREPLY+=($(compgen -W "$available_profiles" -- "$cur"))
+}
+
+__awsprofile_complete_commands() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    COMPREPLY+=($(compgen -W "help version doctor list set current" -- "$cur"))
+}
+
+# compopt is only available in newer versions of bash
+__awsprofile_complete_files() {
+    command -v compopt &>/dev/null && compopt -o default
+}
+
+_awsprofile_set() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    case "$cur" in
+    -*)
+        __awsprofilecomp "
+      "
+        return
+        ;;
+    esac
+    __awsprofile_complete_set
+}
+
+_awsprofile() {
+    local i=1 cmd
+
+    # find the subcommand
+    while [[ "$i" -lt "$COMP_CWORD" ]]; do
+        local s="${COMP_WORDS[i]}"
+        case "$s" in
+        --*)
+            cmd="$s"
+            break
+            ;;
+        -*) ;;
+
+        *)
+            cmd="$s"
+            break
+            ;;
+        esac
+        ((i++))
+    done
+
+    if [[ "$i" -eq "$COMP_CWORD" ]]; then
+        __awsprofile_complete_commands
+        return
+    fi
+
+    # subcommands have their own completion functions
+    case "$cmd" in
+    set) _awsprofile_set ;;
+    *) ;;
+    esac
+}
+
+complete -o bashdefault -o default -F _awsprofile awsprofile

@@ -39,16 +39,17 @@ Want to see what profiles you can switch to?
 
 ## Key features
 
-- Switch from using a single `credential` and `config` file, to having unique files for each of your profiles.
-- Utilizes basic, native OS commands, ensuring it works out of the box on:
+- Switch from using a single `credential` and `config` file, to having unique files for each of your profiles
+- Utilizes native OS commands, ensuring it works out of the box on:
   - macOS
   - Linux
   - FreeBSD
   - WSL (bash on Windows)
 - Full POSIX compatibility
-- **Lightweight** - Will not slow down your terminal.
-- **Simple** - It is a symlink manager that you opperate via CLI.
-- **100% open source** - You can look at the code and see what's going on.
+- Autocomplete for bash, zsh, and fish
+- **Lightweight** - Will not slow down your terminal
+- **Simple** - It is a symlink manager that you opperate via CLI
+- **100% open source** - You can look at the code and see what's going on
 
 ## Installation Instructions
 

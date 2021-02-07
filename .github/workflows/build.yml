@@ -18,6 +18,15 @@ jobs:
       - name: Create build directories
         run: mkdir build build/docs
 
+      - name: Move autocompletions for zsh
+        run: mv completions/zsh/_awsprofile build/completions/zsh/_awsprofile
+
+      - name: Move autocompletions for bash
+        run: mv completions/bash/awsprofile build/completions/bash/awsprofile
+
+      - name: Move autocompletions for fish
+        run: mv completions/fish/awsprofile.fish build/completions/fish/awsprofile.fish
+
       - name: Move awsprofile.sh to build/awsprofile
         run: mv bin/awsprofile build/awsprofile
 

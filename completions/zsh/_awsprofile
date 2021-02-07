@@ -1,0 +1,22 @@
+#compdef awsprofile
+
+_awsprofile() {
+    local -a commands
+
+    commands=(
+        'help:Print help'
+        'version:Print version'
+        'list:List available profiles'
+        'set:Set profile to [profile_name]'
+        'doctor:Check configuration for errors'
+        'current:Print current profile being used'
+    )
+
+    if ((CURRENT == 2)); then
+        _describe -t commands 'commands' commands
+    fi
+
+    return 0
+}
+
+_awsprofile
