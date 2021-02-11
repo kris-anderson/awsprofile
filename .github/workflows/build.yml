@@ -40,10 +40,10 @@ jobs:
         run: sed -i -- "s/__release_date__/$(date +"%Y")/g" build/awsprofile
 
       - name: Set release version in manpage
-        run: sed -i -- "s/**release_version**/awsprofile ${{ env.RELEASE_VERSION }}/g" docs/manpage.md
+        run: sed -i -- "s/\*\*release_version\*\*/awsprofile ${{ env.RELEASE_VERSION }}/g" docs/manpage.md
 
       - name: Set release date in manpage
-        run: sed -i -- "s/**release_date**/$(date +"%B %Y")/g" docs/manpage.md
+        run: sed -i -- "s/\*\*release_date\*\*/$(date +"%B %Y")/g" docs/manpage.md
 
       - name: Create manpage
         run: pandoc docs/manpage.md -s -t man -o build/docs/awsprofile.1
