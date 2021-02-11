@@ -1,22 +1,72 @@
 #compdef awsprofile
+#autoload
 
-_awsprofile() {
-    local -a commands
+# awsprofile ZSH completion function
 
-    commands=(
-        'help:Print help'
-        'version:Print version'
-        'list:List available profiles'
-        'set:Set profile to [profile_name]'
-        'doctor:Check configuration for errors'
-        'current:Print current profile being used'
-    )
+# functions starting with __awsprofile are helper functions that complete or list
+# various types of items.
 
-    if ((CURRENT == 2)); then
-        _describe -t commands 'commands' commands
-    fi
+# functions starting with _awsprofile_ are completions for awsprofile commands
 
-    return 0
+__awsprofile_available_profiles() {
+  [[ -prefix '-' ]] && return 0
+
+  local -a available
+  available=($(awsprofile autocomplete-profile-names))
+  _describe -t available 'available profiles' available
 }
 
-_awsprofile
+__awsprofile_default_commands() {
+  local -a commands
+  commands=(
+    'current:Show current profile being used'
+    'doctor:Perform configuration check'
+    'help:Show help'
+    'list:List available profiles'
+    'set:Set profile to [profile_name]'
+    'version:Show version'
+  )
+  _describe -t default-commands 'default commands' commands
+}
+
+__awsprofile_commands() {
+  _alternative \
+    'default-commands:command:__awsprofile_default_commands'
+}
+
+# awsprofile set
+_awsprofile_set() {
+  _arguments \
+    '::installed_formula:__awsprofile_available_profiles'
+}
+
+# The main completion function
+_awsprofile() {
+  local curcontext="$curcontext" state state_descr line expl
+  local tmp ret=1
+
+  _arguments -C : \
+    '1:command:->command' \
+    '*::options:->options' && return 0
+
+  case "$state" in
+    command)
+      __awsprofile_commands && return 0
+      ;;
+    options)
+      command="${line[1]}"
+
+      # change context to e.g. awsprofile-list
+      curcontext="${curcontext%:*}-${command}:${curcontext##*:}"
+
+      # call completion for named command e.g. _awsprofile_list
+      local completion_func="_awsprofile_${command//-/_}"
+      _call_function ret "${completion_func}" && return ret
+
+      _message "a completion function is not defined for command ${command}"
+      return 1
+    ;;
+  esac
+}
+
+_awsprofile "$@"

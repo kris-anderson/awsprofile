@@ -91,8 +91,7 @@ error() {
 ## regular functions ##
 #######################
 
-list_profiles() {
-    # echo_bold "Available profiles:"
+get_profiles() {
     for config in "$HOME"/.aws/config.*; do
         CONFIG_FILE_PATH=$(realpath "$config")
         CONFIG_FILE_NAME=$(basename -- "$CONFIG_FILE_PATH")
@@ -108,6 +107,15 @@ list_profiles() {
             done
         fi
     done
+}
+
+list_profiles_fancy() {
+    echo_bold "Available profiles:"
+    get_profiles
+}
+
+list_profiles_simple() {
+    get_profiles
 }
 
 default_aws_files_exist() {
@@ -217,7 +225,7 @@ if [ "$1" = "current" ]; then
         echo_bold "Set your profile with:"
         echo "awsprofile set your_profile_name"
         echo
-        list_profiles
+        list_profiles_fancy
         exit 1
     fi
 fi
@@ -347,7 +355,16 @@ fi
 
 if [ "$1" = "list" ]; then
     setup_check
-    list_profiles
+    list_profiles_fancy
+    exit 0
+fi
+
+#########################################
+## command: autocomplete-profile-names ##
+#########################################
+
+if [ "$1" = "autocomplete-profile-names" ]; then
+    list_profiles_simple
     exit 0
 fi
 
