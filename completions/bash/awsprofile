@@ -39,7 +39,7 @@ __awsprofilecomp() {
 
 __awsprofile_complete_set() {
     local cur="${COMP_WORDS[COMP_CWORD]}"
-    local available_profiles="$(awsprofile --list)"
+    local available_profiles="$(awsprofile autocomplete-profile-names)"
     COMPREPLY+=($(compgen -W "$available_profiles" -- "$cur"))
 }
 
