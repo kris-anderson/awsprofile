@@ -60,7 +60,7 @@ end
 # These functions return lists of suggestions for arguments completion
 
 function __fish_awsprofile_suggest_profiles
-    "$HOME/repos/personal/awsprofile/bin/awsprofile" list
+    awsprofile autocomplete-profile-names
 end
 
 ##########################
