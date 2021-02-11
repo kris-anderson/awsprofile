@@ -39,7 +39,7 @@ Awsprofile is out of the box portable. It runs under any Unix-like stack: macOS,
 : list available profiles
 
 **set** _profile_name_
-: set profile to _profile_name_
+: set profile to [_profile_name_]
 
 **version**
 : print version info
