@@ -34,19 +34,29 @@
 ############################
 
 if [ -t 1 ]; then
-    GREEN=$(tput setaf 2)
+    # BLACK=$(tput setaf 0)
     BLUE=$(tput setaf 4)
-    YELLOW=$(tput setaf 3)
-    RED=$(tput setaf 1)
     BOLD=$(tput bold)
-    RESET_FONT=$(tput sgr0)
+    # CYAN=$(tput setaf 6)
+    GREEN=$(tput setaf 2)
+    # MAGENTA=$(tput setaf 5)
+    RED=$(tput setaf 1)
+    RESET=$(tput sgr0)
+    # UNDERLINE=$(tput smul)
+    # WHITE=$(tput setaf 7)
+    YELLOW=$(tput setaf 3)
 else
-    GREEN=""
+    # BLACK=""
     BLUE=""
-    YELLOW=""
-    RED=""
     BOLD=""
-    RESET_FONT=""
+    # CYAN=""
+    GREEN=""
+    # MAGENTA=""
+    RED=""
+    RESET=""
+    # UNDERLINE=""
+    # WHITE=""
+    YELLOW=""
 fi
 
 ######################
@@ -54,29 +64,29 @@ fi
 ######################
 
 arrow_icon() {
-    printf "%s ⇒ %s\n" "${BOLD}${YELLOW}" "${RESET_FONT}${1}"
+    printf "%s ⇒ %s\n" "${BOLD}${YELLOW}" "${RESET}${1}"
 }
 
 print_warning() {
-    printf "%s** Warning **%s\n" "${BOLD}${YELLOW}" "${RESET_FONT}"
+    printf "%s** Warning **%s\n" "${BOLD}${YELLOW}" "${RESET}"
     printf "%s\n" "$1"
 }
 
 print_error() {
-    printf "%s** Error **%s\n" "${BOLD}${RED}" "${RESET_FONT}"
+    printf "%s** Error **%s\n" "${BOLD}${RED}" "${RESET}"
     printf "%s\n" "$1"
 }
 
 ok() {
-    printf "%s[ok]%s" "${BOLD}${GREEN}" "${RESET_FONT}"
+    printf "%s[ok]%s" "${BOLD}${GREEN}" "${RESET}"
 }
 
 failed() {
-    printf "%s[failed]%s" "${BOLD}${RED}" "${RESET_FONT}"
+    printf "%s[failed]%s" "${BOLD}${RED}" "${RESET}"
 }
 
 error() {
-    printf "%s[error]%s" "${BOLD}${RED}" "${RESET_FONT}"
+    printf "%s[error]%s" "${BOLD}${RED}" "${RESET}"
 }
 
 #######################
@@ -89,12 +99,12 @@ get_profiles() {
         CONFIG_FILE_NAME=$(basename -- "$CONFIG_FILE_PATH")
         PROFILE_NAME="${CONFIG_FILE_NAME##*.}"
         if file_contains_aws_keys "$CONFIG_FILE_PATH"; then
-            printf "%s\n" "${BLUE}$PROFILE_NAME${RESET_FONT}"
+            printf "%s\n" "${BLUE}$PROFILE_NAME${RESET}"
         else
             for credentials in $HOME/.aws/credentials.$PROFILE_NAME; do
                 CREDENTIAL_FILE_PATH=$(realpath "$credentials")
                 if file_contains_aws_keys "$CREDENTIAL_FILE_PATH"; then
-                    printf "%s\n" "${BLUE}$PROFILE_NAME${RESET_FONT}"
+                    printf "%s\n" "${BLUE}$PROFILE_NAME${RESET}"
                 fi
             done
         fi
@@ -102,7 +112,7 @@ get_profiles() {
 }
 
 list_profiles_fancy() {
-    printf "%sAvailable profiles:%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sAvailable profiles:%s\n" "${BOLD}" "${RESET}"
     get_profiles
 }
 
@@ -118,7 +128,7 @@ default_aws_files_exist() {
 setup_check() {
     if default_aws_files_exist; then
         print_error "awsprofile is not setup correctly"
-        printf "\n%sPerform a full test with:%s\n" "${BOLD}" "${RESET_FONT}"
+        printf "\n%sPerform a full test with:%s\n" "${BOLD}" "${RESET}"
         printf "awsprofile doctor\n"
         exit 1
     fi
@@ -184,7 +194,7 @@ print_command_missing() {
     setup_check
     print_warning "$1"
     printf "\n"
-    printf "%sPrint available commands with:%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sPrint available commands with:%s\n" "${BOLD}" "${RESET}"
     printf "awsprofile help\n"
     exit 1
 }
@@ -207,14 +217,14 @@ if [ "$1" = "current" ]; then
     CONFIG_SYMLINK_NAME=$(basename -- "$CONFIG_FILE_PATH")
     PROFILE_NAME="${CONFIG_SYMLINK_NAME##*.}"
     if aws_config_is_symlink; then
-        printf "%sCurrent profile:%s\n" "${BOLD}" "${RESET_FONT}"
-        printf "%s\n" "${BOLD}${GREEN}${PROFILE_NAME}${RESET_FONT}"
+        printf "%sCurrent profile:%s\n" "${BOLD}" "${RESET}"
+        printf "%s\n" "${BOLD}${GREEN}${PROFILE_NAME}${RESET}"
         exit 0
     else
         print_warning "Profile not set"
         printf "\n"
-        printf "%sSet your profile with:%s\n" "${BOLD}" "${RESET_FONT}"
-        printf "awsprofile set %sprofile_name%s\n" "${BLUE}" "${RESET_FONT}"
+        printf "%sSet your profile with:%s\n" "${BOLD}" "${RESET}"
+        printf "awsprofile set %sprofile_name%s\n" "${BLUE}" "${RESET}"
         printf "\n"
         list_profiles_fancy
         exit 1
@@ -227,7 +237,7 @@ fi
 
 if [ "$1" = "doctor" ]; then
 
-    printf "%sChecking for required command line utilities%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sChecking for required command line utilities%s\n" "${BOLD}" "${RESET}"
 
     required_utilities_list="basename find readlink realpath tr"
     printf "%s" "$required_utilities_list" | tr ' ' '\n' | while read -r utility_name; do
@@ -241,31 +251,31 @@ if [ "$1" = "doctor" ]; then
     done
 
     printf "\n"
-    printf "%sChecking ~/.aws/ directory for default files%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sChecking ~/.aws/ directory for default files%s\n" "${BOLD}" "${RESET}"
 
     if aws_credentials_file_exists; then
         printf "%s credentials should not exist\n" "$(failed)"
-        printf "  %shint:%s move the file contents\n" "${BOLD}" "${RESET_FONT}"
-        printf "    %sfrom this:%s $HOME/.aws/credentials\n" "${BOLD}" "${RESET_FONT}"
-        printf "    %sto this:%s $HOME/.aws/config.your_profile_name\n" "${BOLD}" "${RESET_FONT}"
-        printf "    %sor this:%s $HOME/.aws/credentials.your_profile_name\n" "${BOLD}" "${RESET_FONT}"
-        printf "    %sthen delete:%s $HOME/.aws/credentials\n" "${BOLD}" "${RESET_FONT}"
+        printf "  %shint:%s move the file contents\n" "${BOLD}" "${RESET}"
+        printf "    %sfrom this:%s $HOME/.aws/credentials\n" "${BOLD}" "${RESET}"
+        printf "    %sto this:%s $HOME/.aws/config.your_profile_name\n" "${BOLD}" "${RESET}"
+        printf "    %sor this:%s $HOME/.aws/credentials.your_profile_name\n" "${BOLD}" "${RESET}"
+        printf "    %sthen delete:%s $HOME/.aws/credentials\n" "${BOLD}" "${RESET}"
     else
         printf "%s credentials should not exist\n" "$(ok)"
     fi
 
     if aws_config_file_exists; then
         printf "%s config should not exist\n" "$(failed)"
-        printf "  %shint:%s move the file contents\n" "${BOLD}" "${RESET_FONT}"
-        printf "    %sfrom this:%s $HOME/.aws/config\n" "${BOLD}" "${RESET_FONT}"
-        printf "    %sto this:%s $HOME/.aws/config.your_profile_name\n" "${BOLD}" "${RESET_FONT}"
-        printf "    %sthen delete:%s $HOME/.aws/config\n" "${BOLD}" "${RESET_FONT}"
+        printf "  %shint:%s move the file contents\n" "${BOLD}" "${RESET}"
+        printf "    %sfrom this:%s $HOME/.aws/config\n" "${BOLD}" "${RESET}"
+        printf "    %sto this:%s $HOME/.aws/config.your_profile_name\n" "${BOLD}" "${RESET}"
+        printf "    %sthen delete:%s $HOME/.aws/config\n" "${BOLD}" "${RESET}"
     else
         printf "%s config should not exist\n" "$(ok)"
     fi
 
     printf "\n"
-    printf "%sChecking ~/.aws/ for custom configuration files%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sChecking ~/.aws/ for custom configuration files%s\n" "${BOLD}" "${RESET}"
 
     if awsprofile_config_exist; then
 
@@ -276,7 +286,7 @@ if [ "$1" = "doctor" ]; then
             PROFILE_NAME="${CONFIG_FILE_NAME##*.}"
 
             printf "\n"
-            printf "  %sProfile:%s %s\n" "${BOLD}" "${RESET_FONT}" "${BOLD}${BLUE}${PROFILE_NAME}${RESET_FONT}"
+            printf "  %sProfile:%s %s\n" "${BOLD}" "${RESET}" "${BOLD}${BLUE}${PROFILE_NAME}${RESET}"
 
             if awsprofile_config_contains_default; then
                 printf "  %s %s contains [default] on line 1\n" "$(ok)" "$CONFIG_FILE_NAME"
@@ -318,10 +328,10 @@ fi
 ###################
 
 if [ "$1" = "help" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
-    printf "%sUsage:%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sUsage:%s\n" "${BOLD}" "${RESET}"
     printf "  awsprofile <command> [options]\n"
     printf "\n"
-    printf "%sCommands:%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sCommands:%s\n" "${BOLD}" "${RESET}"
     printf "  current             Show current profile\n"
     printf "  doctor              Checks for potential problems\n"
     printf "  help                Show this help message\n"
@@ -330,10 +340,10 @@ if [ "$1" = "help" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     printf "  set                 Set profile to [profile_name]\n"
     printf "  version             Show version\n"
     printf "\n"
-    printf "%sOptions:%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sOptions:%s\n" "${BOLD}" "${RESET}"
     printf "  profile_name        Name of your custom profile\n"
     printf "\n"
-    printf "%sExample usage:%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sExample usage:%s\n" "${BOLD}" "${RESET}"
     printf "  awsprofile current\n"
     printf "  awsprofile list\n"
     printf "  awsprofile set personal\n"
@@ -369,10 +379,10 @@ if [ "$1" = "set" ]; then
     if empty_input "$2"; then
         print_warning "No profile name provided"
         printf "\n"
-        printf "%sprofile_name is required with the set command:%s\n" "${BOLD}" "${RESET_FONT}"
+        printf "%sprofile_name is required with the set command:%s\n" "${BOLD}" "${RESET}"
         printf "awsprofile set profile_name\n"
         printf "\n"
-        printf "%sView available profiles with:%s\n" "${BOLD}" "${RESET_FONT}"
+        printf "%sView available profiles with:%s\n" "${BOLD}" "${RESET}"
         printf "awsprofile list\n"
         exit 1
     elif ! config_file_found "$2"; then
@@ -424,7 +434,7 @@ if [ "$1" = "set" ]; then
         ln -s "$HOME/.aws/credentials.$2" "$HOME/.aws/credentials"
     fi
 
-    printf "Profile now set to: %s\n" "${BOLD}${GREEN}$2${RESET_FONT}"
+    printf "Profile now set to: %s\n" "${BOLD}${GREEN}$2${RESET}"
     exit 0
 
 fi
@@ -445,19 +455,19 @@ fi
 ############################
 
 if [ "$1" = "initial-setup" ]; then
-    printf "%sTake the content from these files:%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sTake the content from these files:%s\n" "${BOLD}" "${RESET}"
     printf "%s/.aws/config\n" "$HOME"
     printf "%s.aws/credentials\n" "$HOME/"
     printf "\n"
-    printf "%sand move them to a new file that follows this naming convention:%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sand move them to a new file that follows this naming convention:%s\n" "${BOLD}" "${RESET}"
     arrow_icon "$HOME/.aws/config.your_profile_name"
     printf "\n"
-    printf "%sExamples%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sExamples%s\n" "${BOLD}" "${RESET}"
     arrow_icon "$HOME/.aws/config.personal"
     arrow_icon "$HOME/.aws/config.work"
     arrow_icon "$HOME/.aws/config.whatever"
     printf "\n"
-    printf "%sEach config file's contents should look similar to this:%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sEach config file's contents should look similar to this:%s\n" "${BOLD}" "${RESET}"
     printf "==============================================================\n"
     printf "[default]\n"
     printf "aws_access_key_id=AK##################\n"
@@ -469,7 +479,7 @@ if [ "$1" = "initial-setup" ]; then
     printf "Change the contents to match your configuration, but keep [default]\n"
     printf "as the first line for each config file\n"
     printf "\n"
-    printf "%sNote:%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sNote:%s\n" "${BOLD}" "${RESET}"
     printf "You can also separate the credentials from your config files\n"
     printf "if you prefer. Keep [default] as the first line in each credential\n"
     printf "file. If you choose to do this, your ~/.aws/ directory may look like:\n"
@@ -480,7 +490,7 @@ if [ "$1" = "initial-setup" ]; then
     arrow_icon "$HOME/.aws/credentials.work"
     arrow_icon "$HOME/.aws/credentials.whatever"
     printf "\n"
-    printf "%sDelete the default files after you create your custom config files:%s\n" "${BOLD}" "${RESET_FONT}"
+    printf "%sDelete the default files after you create your custom config files:%s\n" "${BOLD}" "${RESET}"
     arrow_icon "$HOME/.aws/config"
     arrow_icon "$HOME/.aws/credentials"
     exit 0
