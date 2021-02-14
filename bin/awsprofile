@@ -239,7 +239,7 @@ if [ "$1" = "doctor" ] || [ "$1" = "dr" ]; then
 
     printf "%sChecking for required command line utilities%s\n" "${BOLD}" "${RESET}"
 
-    required_utilities_list="basename find readlink realpath tr"
+    required_utilities_list="basename find readlink realpath tr "
     printf "%s" "$required_utilities_list" | tr ' ' '\n' | while read -r utility_name; do
 
         if test_if_utility_installed "$utility_name"; then
