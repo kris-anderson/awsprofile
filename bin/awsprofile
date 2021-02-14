@@ -355,7 +355,7 @@ fi
 ## command: list ##
 ###################
 
-if [ "$1" = "list" ]; then
+if [ "$1" = "list" ] || [ "$1" = "ls" ]; then
     setup_check
     list_profiles_fancy
     exit 0
