@@ -19,12 +19,13 @@ __awsprofile_available_profiles() {
 __awsprofile_default_commands() {
   local -a commands
   commands=(
-    'current:Show current profile being used'
-    'doctor:Perform configuration check'
-    'help:Show help'
+    'current:Show current profile in use'
+    'doctor:Check for potential problems'
+    'help:Show help message'
+    'initial-setup:Show initial setup instructions
     'list:List available profiles'
     'set:Set profile to [profile_name]'
-    'version:Show version'
+    'version:Show version information'
   )
   _describe -t default-commands 'default commands' commands
 }

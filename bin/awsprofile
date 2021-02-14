@@ -331,23 +331,27 @@ if [ "$1" = "help" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     printf "%sUsage:%s\n" "${BOLD}" "${RESET}"
     printf "  awsprofile <command> [options]\n"
     printf "\n"
-    printf "%sCommands:%s\n" "${BOLD}" "${RESET}"
-    printf "  current             Show current profile\n"
-    printf "  doctor              Checks for potential problems\n"
-    printf "  help                Show this help message\n"
-    printf "  initial-setup       Show initial setup instructions\n"
-    printf "  list                List available profiles\n"
-    printf "  set                 Set profile to [profile_name]\n"
-    printf "  version             Show version\n"
-    printf "\n"
-    printf "%sOptions:%s\n" "${BOLD}" "${RESET}"
-    printf "  profile_name        Name of your custom profile\n"
-    printf "\n"
     printf "%sExample usage:%s\n" "${BOLD}" "${RESET}"
     printf "  awsprofile current\n"
-    printf "  awsprofile list\n"
     printf "  awsprofile set personal\n"
     printf "  awsprofile set work\n"
+    printf "\n"
+    printf "%sCommands:%s\n" "${BOLD}" "${RESET}"
+    printf "  current             Show current profile in use\n"
+    printf "  list                List available profiles\n"
+    printf "  set                 Set profile to [profile_name]\n"
+    printf "\n"
+    printf "%sHelp Commands:%s\n" "${BOLD}" "${RESET}"
+    printf "  help                Show this help message\n"
+    printf "  initial-setup       Show initial setup instructions\n"
+    printf "\n"
+    printf "%sTroubleshooting Commands:%s\n" "${BOLD}" "${RESET}"
+    printf "  doctor              Checks for potential problems\n"
+    printf "  version             Show version information\n"
+    printf "\n"
+    printf "%sFurther help:%s\n" "${BOLD}" "${RESET}"
+    printf "  man awsprofile      View the manpage\n"
+    printf "  https://github.com/kris-anderson/awsprofile\n"
     exit 0
 fi
 
@@ -450,11 +454,11 @@ if [ "$1" = "version" ] || [ "$1" = "-v" ] || [ "$1" = "--version" ]; then
     exit 0
 fi
 
-###########################
-## command: instructions ##
-###########################
+############################
+## command: initial-setup ##
+############################
 
-if [ "$1" = "instructions" ]; then
+if [ "$1" = "initial-setup" ]; then
     printf "%sTake the content from these files:%s\n" "${BOLD}" "${RESET}"
     printf "%s/.aws/config\n" "$HOME"
     printf "%s.aws/credentials\n" "$HOME/"

@@ -45,7 +45,7 @@ __awsprofile_complete_set() {
 
 __awsprofile_complete_commands() {
     local cur="${COMP_WORDS[COMP_CWORD]}"
-    COMPREPLY+=($(compgen -W "help version doctor list set current" -- "$cur"))
+    COMPREPLY+=($(compgen -W "help version doctor list set current initial-setup" -- "$cur"))
 }
 
 # compopt is only available in newer versions of bash

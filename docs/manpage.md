@@ -12,13 +12,7 @@ awsprofile set _profile_name_
 
 # DESCRIPTION
 
-Switch from using a single _credential_ and _config_ file, to having unique files for each of your profiles.
-
-Lightweight - Will not slow down your terminal.
-
-Simple - It is a symlink manager that you opperate via CLI.
-
-100% open source - You can look at the code and see what's going on.
+Switch from using a single _credential_ and _config_ file, to having unique files for each of your profiles. Awsprofile is a symlink manager that you opperate via CLI. It includes autocomplete for bash, zsh, and fish.
 
 # REQUIREMENTS
 
@@ -27,13 +21,13 @@ Awsprofile is out of the box portable. It runs under any Unix-like stack: macOS,
 # OPTIONS
 
 **current**
-: print current profile
+: show current profile in use
 
 **doctor**
 : checks for potential problems
 
 **help**
-: print help message
+: show help message
 
 **list**
 : list available profiles
@@ -42,7 +36,7 @@ Awsprofile is out of the box portable. It runs under any Unix-like stack: macOS,
 : set profile to [_profile_name_]
 
 **version**
-: print version info
+: show version information
 
 # EXAMPLES
 
@@ -55,7 +49,7 @@ Awsprofile is out of the box portable. It runs under any Unix-like stack: macOS,
 **awsprofile current**
 : prints the currently used profile
 
-# INITIAL CONFIGURATION
+# INITIAL SETUP INSTRUCTIONS
 
 You need to change the structure of your _~/.aws/_ folder contents. Currently, you should have two files in that folder:
 

@@ -97,11 +97,17 @@ end
 ## COMMANDS ##
 ##############
 
-# help
-__fish_awsprofile_complete_cmd 'help' 'Print help'
+# current
+__fish_awsprofile_complete_cmd 'current' 'Show current profile in use'
 
-# version
-__fish_awsprofile_complete_cmd 'version' 'Print version'
+# doctor
+__fish_awsprofile_complete_cmd 'doctor' 'Check for potential problems'
+
+# help
+__fish_awsprofile_complete_cmd 'help' 'Show help message'
+
+# initial-setup
+__fish_awsprofile_complete_cmd 'initial-setup' 'Show initial setup instructions'
 
 # list
 __fish_awsprofile_complete_cmd 'list' 'List available profiles'
@@ -110,8 +116,5 @@ __fish_awsprofile_complete_cmd 'list' 'List available profiles'
 __fish_awsprofile_complete_cmd 'set' 'Set profile to [profile_name]'
 __fish_awsprofile_complete_arg 'set' -a '(__fish_awsprofile_suggest_profiles)'
 
-# current
-__fish_awsprofile_complete_cmd 'current' 'Print current profile'
-
-# doctor
-__fish_awsprofile_complete_cmd 'doctor' 'Perform configuration check'
+# version
+__fish_awsprofile_complete_cmd 'version' 'Show version information'
