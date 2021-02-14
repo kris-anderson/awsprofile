@@ -207,6 +207,11 @@ empty_input() {
     test "$1" = ""
 }
 
+# used by ShellSpec for tests
+# do not modify or delete these comments
+# these lines are deleted during the build process
+${__SOURCED__:+return}
+
 ######################
 ## command: current ##
 ######################
