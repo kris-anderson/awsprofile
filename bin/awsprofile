@@ -450,11 +450,11 @@ if [ "$1" = "version" ] || [ "$1" = "-v" ] || [ "$1" = "--version" ]; then
     exit 0
 fi
 
-############################
-## command: initial-setup ##
-############################
+###########################
+## command: instructions ##
+###########################
 
-if [ "$1" = "initial-setup" ]; then
+if [ "$1" = "instructions" ]; then
     printf "%sTake the content from these files:%s\n" "${BOLD}" "${RESET}"
     printf "%s/.aws/config\n" "$HOME"
     printf "%s.aws/credentials\n" "$HOME/"
